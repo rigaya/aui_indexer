@@ -20,25 +20,7 @@ void print_help() {
 		"          if not set, this will try to use %s.\n", LSMASHINPUT_NAME[0]);
 }
 
-void check_aviutl_dir(const char *aui_path, char *aviutl_dir, size_t n_len) {
-	ZeroMemory(aviutl_dir, n_len);
-	char buffer[MAX_PATH_LEN] = { 0 };
-	strcpy_s(buffer, _countof(buffer), aui_path);
-	PathRemoveFileSpec(buffer);
-
-	char tmp[MAX_PATH_LEN] = { 0 };
-	PathCombine(tmp, buffer, AVIUTL_NAME);
-	if (PathFileExists(tmp)) {
-		strcpy_s(aviutl_dir, n_len, buffer);
-	} else {
-		PathRemoveFileSpec(buffer);
-		PathCombine(tmp, buffer, AVIUTL_NAME);
-		if (PathFileExists(tmp)) {
-			strcpy_s(aviutl_dir, n_len, buffer);
-		}
-	}
-}
-
+//PathRemoveFileSpecFixedがVistaでは5C問題を発生させるため、その回避策
 static BOOL PathRemoveFileSpecFixed(char *path) {
 	char *ptr = PathFindFileNameA(path);
 	if (path == ptr)
@@ -47,9 +29,32 @@ static BOOL PathRemoveFileSpecFixed(char *path) {
 	return TRUE;
 }
 
+//aui_pathと同じ場所、あるいはその一つ上の階層にAviutlがあれば、
+//そのディレクトリをaviutl_dirに格納する
+template<int size>
+void check_aviutl_dir(char(& aviutl_dir)[size], const char *aui_path) {
+	ZeroMemory(aviutl_dir, size * sizeof(aviutl_dir[0]));
+	char buffer[MAX_PATH_LEN] = { 0 };
+	strcpy_s(buffer, aui_path);
+	PathRemoveFileSpecFixed(buffer);
+
+	char tmp[MAX_PATH_LEN] = { 0 };
+	PathCombine(tmp, buffer, AVIUTL_NAME);
+	if (PathFileExists(tmp)) {
+		strcpy_s(aviutl_dir, buffer);
+	} else {
+		PathRemoveFileSpecFixed(buffer);
+		PathCombine(tmp, buffer, AVIUTL_NAME);
+		if (PathFileExists(tmp)) {
+			strcpy_s(aviutl_dir, buffer);
+		}
+	}
+}
+
 //lwinput.auiの設定ファイルをきちんと反映するため、
 //できればAviutl.exeの位置に一時的にカレントディレクトリを移したいので、
-//lwinput.auiのフルパスがほしいが、とれなければ諦める
+//lwinput.auiのフルパスがほしいので、それをaui_pathに格納する
+//だめなら、素直にLoadLibraryを試みる
 template<int size>
 int get_aui_path_auto(char(& aui_path)[size], const char *exe_path) {
 	char buffer[MAX_PATH_LEN] = { 0 };
@@ -112,11 +117,11 @@ int main(int argc, char **argv) {
 	char current_dir[MAX_PATH_LEN] = { 0 };
 	char aviutl_dir[MAX_PATH_LEN] = { 0 };
 	if (!PathIsRelative(aui_path)) {
-		check_aviutl_dir(aui_path, aviutl_dir, _countof(aviutl_dir));
+		check_aviutl_dir(aviutl_dir, aui_path);
 	}
 	
 	GetCurrentDirectory(_countof(current_dir), current_dir);
-	fclose(stderr);
+	fclose(stderr); //ffmpegのエラー出力すると遅い( & うるさい) ので殺す
 
 	int ret = 0;
 	HMODULE hmd = NULL;
@@ -129,11 +134,11 @@ int main(int argc, char **argv) {
 		&& ipt->func_close ) {
 		if (ipt->func_init) ipt->func_init();
 		for ( ; i_arg < argc; i_arg++) {
-			char target_fullpath[MAX_PATH_LEN];
+			char target_fullpath[MAX_PATH_LEN] = { 0 };
 			if (PathIsRelative(argv[i_arg]))
 				_fullpath(target_fullpath, argv[i_arg], sizeof(target_fullpath));
 			else
-				strcpy_s(target_fullpath, _countof(target_fullpath), argv[i_arg]);
+				strcpy_s(target_fullpath, argv[i_arg]);
 			fprintf(stdout, "processing %s ...\n", PathFindFileName(target_fullpath));
 
 			//lwinput.auiの設定ファイルをきちんと反映するため、
