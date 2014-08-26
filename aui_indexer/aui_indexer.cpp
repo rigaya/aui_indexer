@@ -39,6 +39,47 @@ void check_aviutl_dir(const char *aui_path, char *aviutl_dir, size_t n_len) {
 	}
 }
 
+static BOOL PathRemoveFileSpecFixed(char *path) {
+	char *ptr = PathFindFileNameA(path);
+	if (path == ptr)
+		return FALSE;
+	*(ptr - 1) = '\0';
+	return TRUE;
+}
+
+//lwinput.auiの設定ファイルをきちんと反映するため、
+//できればAviutl.exeの位置に一時的にカレントディレクトリを移したいので、
+//lwinput.auiのフルパスがほしいが、とれなければ諦める
+template<int size>
+int get_aui_path_auto(char(& aui_path)[size], const char *exe_path) {
+	char buffer[MAX_PATH_LEN] = { 0 };
+	strcpy_s(buffer, exe_path);
+	PathRemoveFileSpecFixed(buffer);
+
+	//実行ファイルがある場所で検索
+	for (int i = 0; i < _countof(LSMASHINPUT_NAME); i++) {
+		PathCombine(aui_path, buffer, LSMASHINPUT_NAME[i]);
+		if (PathFileExists(aui_path))
+			return 0;
+	}
+	//次にカレントディレクトリで検索
+	for (int i = 0; i < _countof(LSMASHINPUT_NAME); i++) {
+		_fullpath(aui_path, LSMASHINPUT_NAME[i], size);
+		if (PathFileExists(aui_path))
+			return 0;
+	}
+	//次に普通に...
+	for (int i = 0; i < _countof(LSMASHINPUT_NAME); i++) {
+		HMODULE hModule = LoadLibrary(LSMASHINPUT_NAME[i]);
+		if (NULL != hModule) {
+			FreeLibrary(hModule);
+			strcpy_s(aui_path, LSMASHINPUT_NAME[i]);
+			return 0;
+		}
+	}
+	return 1;
+}
+
 int main(int argc, char **argv) {
 	if (argc <= 1 || (0 == strcmp(argv[1], "-aui") && argc <= 3)) {
 		fprintf(stdout, "invalid option(s).\n");
@@ -59,21 +100,22 @@ int main(int argc, char **argv) {
 			strcpy_s(aui_path, _countof(aui_path), argv[i_arg+1]);
 		i_arg += 2;
 	} else {
-		for (int i = 0; i < _countof(LSMASHINPUT_NAME); i++) {
-			_fullpath(aui_path, LSMASHINPUT_NAME[i], sizeof(aui_path));
-			if (PathFileExists(aui_path))
-				break;
+		if (get_aui_path_auto(aui_path, argv[0])) {
+			fprintf(stdout, "could not find aui file.\n");
+			return 1;
 		}
 	}
-	if (!PathFileExists(aui_path)) {
-		fprintf(stdout, "could not find aui file.\n");
-		return 1;
-	}
 
-	char current_dir[MAX_PATH_LEN];
-	char aviutl_dir[MAX_PATH_LEN];
+	//lwinput.auiの設定ファイルをきちんと反映するため、
+	//できればAviutl.exeの位置に一時的にカレントディレクトリを移したいが、
+	//そのためにはlwinput.auiのフルパスが必要
+	char current_dir[MAX_PATH_LEN] = { 0 };
+	char aviutl_dir[MAX_PATH_LEN] = { 0 };
+	if (!PathIsRelative(aui_path)) {
+		check_aviutl_dir(aui_path, aviutl_dir, _countof(aviutl_dir));
+	}
+	
 	GetCurrentDirectory(_countof(current_dir), current_dir);
-	check_aviutl_dir(aui_path, aviutl_dir, _countof(aviutl_dir));
 	fclose(stderr);
 
 	int ret = 0;
@@ -93,11 +135,15 @@ int main(int argc, char **argv) {
 			else
 				strcpy_s(target_fullpath, _countof(target_fullpath), argv[i_arg]);
 			fprintf(stdout, "processing %s ...\n", PathFindFileName(target_fullpath));
+
+			//lwinput.auiの設定ファイルをきちんと反映するため、
+			//できればAviutl.exeの位置に一時的にカレントディレクトリを移したい
 			if (PathIsDirectory(aviutl_dir))
 				SetCurrentDirectory(aviutl_dir);
 			INPUT_HANDLE in_hnd = ipt->func_open(target_fullpath);
 			if (in_hnd != NULL)
 				ipt->func_close(in_hnd);
+			//カレントディレクトリはすぐに戻しておく
 			SetCurrentDirectory(current_dir);
 		}
 		if (ipt->func_exit) ipt->func_exit();
