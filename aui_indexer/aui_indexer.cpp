@@ -4,7 +4,14 @@
 #pragma comment(lib, "Shlwapi.lib")
 #include "input.h"
 
-static const char * const LSMASHINPUT_NAME[] = { "lwinput.aui", "plugins\\lwinput.aui", "lsmashinput.aui", "plugins\\lsmashinput.aui" };
+static const char * const AUI_LIST[] = {
+	"lwinput.aui",
+	"plugins\\lwinput.aui",
+	"m2v.aui",
+	"plugins\\m2v.aui",
+	"lsmashinput.aui",
+	"plugins\\lsmashinput.aui"
+};
 static const char * AVIUTL_NAME = "Aviutl.exe";
 
 static const int MAX_PATH_LEN = 2048;
@@ -17,7 +24,10 @@ void print_help() {
 		"  options...\n"
 		"    -h    print help\n"
 		"    -aui  set aui path\n"
-		"          if not set, this will try to use %s.\n", LSMASHINPUT_NAME[0]);
+		"          if not set, this will try to use aui below.\n");
+	for (int i = 0; i < _countof(AUI_LIST); i++) {
+		fprintf(stdout, "            %s\n", AUI_LIST[i]);
+	}
 }
 
 //PathRemoveFileSpecFixedがVistaでは5C問題を発生させるため、その回避策
@@ -62,23 +72,23 @@ int get_aui_path_auto(char(& aui_path)[size], const char *exe_path) {
 	PathRemoveFileSpecFixed(buffer);
 
 	//実行ファイルがある場所で検索
-	for (int i = 0; i < _countof(LSMASHINPUT_NAME); i++) {
-		PathCombine(aui_path, buffer, LSMASHINPUT_NAME[i]);
+	for (int i = 0; i < _countof(AUI_LIST); i++) {
+		PathCombine(aui_path, buffer, AUI_LIST[i]);
 		if (PathFileExists(aui_path))
 			return 0;
 	}
 	//次にカレントディレクトリで検索
-	for (int i = 0; i < _countof(LSMASHINPUT_NAME); i++) {
-		_fullpath(aui_path, LSMASHINPUT_NAME[i], size);
+	for (int i = 0; i < _countof(AUI_LIST); i++) {
+		_fullpath(aui_path, AUI_LIST[i], size);
 		if (PathFileExists(aui_path))
 			return 0;
 	}
 	//次に普通に...
-	for (int i = 0; i < _countof(LSMASHINPUT_NAME); i++) {
-		HMODULE hModule = LoadLibrary(LSMASHINPUT_NAME[i]);
+	for (int i = 0; i < _countof(AUI_LIST); i++) {
+		HMODULE hModule = LoadLibrary(AUI_LIST[i]);
 		if (NULL != hModule) {
 			FreeLibrary(hModule);
-			strcpy_s(aui_path, LSMASHINPUT_NAME[i]);
+			strcpy_s(aui_path, AUI_LIST[i]);
 			return 0;
 		}
 	}
