@@ -255,7 +255,9 @@ int main(int argc, char **argv) {
     }
     
     GetCurrentDirectory(_countof(current_dir), current_dir);
-    fclose(stderr); //ffmpegのエラー出力すると遅い( & うるさい) ので殺す
+#if NDEBUG
+    fclose(stderr); //libavformat/libavcodecのエラー出力を表示すると遅い( & うるさい) ので殺す
+#endif
 
     int ret = 0;
     HMODULE hmd = NULL;
