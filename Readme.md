@@ -33,12 +33,12 @@ aui_indexer.exe [オプション] <対象ファイル1> [<対象ファイル2>] 
 lwinput.auiとm2v.auiでしか試してませんが。
 
 -auiを指定しない場合、
-  lwinput.aui  
-  plugins\lwinput.aui  
-  m2v.aui  
-  plugins\m2v.aui  
-  lsmashinput.aui  
-  plugins\lsmashinput.aui  
+- lwinput.aui
+- plugins\lwinput.aui
+- m2v.aui
+- plugins\m2v.aui
+- lsmashinput.aui
+- plugins\lsmashinput.aui  
 を上から順に検索し、使用します。
 
 make_glのようにレジストリから拾っているわけではないので、
