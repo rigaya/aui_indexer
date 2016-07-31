@@ -205,7 +205,9 @@ int main(int argc, char **argv) {
         print_help();
         return 1;
     }
-    if (strcmp(argv[1], "-h") == 0) {
+    if (   _stricmp(argv[1], "-h") == 0
+        || _stricmp(argv[1], "-?") == 0
+        || _stricmp(argv[1], "--help") == 0) {
         print_help();
         return 0;
     }

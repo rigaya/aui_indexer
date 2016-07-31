@@ -1,7 +1,7 @@
 #include <winver.h>
 
-#define VER_FILEVERSION     0,0,3,0
-#define VER_STR_FILEVERSION "0.03"
+#define VER_FILEVERSION     0,0,4,0
+#define VER_STR_FILEVERSION "0.04"
 #define EXE_NAME            "aui_indexer.exe"
 #define EXE_INFO            "aui_indexer"
 
