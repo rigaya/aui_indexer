@@ -240,7 +240,7 @@ int main(int argc, char **argv) {
             return 1;
         }
     }
-    if (!PathIsDirectory(tmpdir)) {
+    if (strlen(tmpdir) && !PathIsDirectory(tmpdir)) {
         fprintf(stdout, "temp directory \"%s\" does not exist.\n", tmpdir);
         return 1;
     }
