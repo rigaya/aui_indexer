@@ -6,7 +6,7 @@ lwinput.auiやm2v.auiで必要なindexファイルなどを事前生成します
 インデックス生成は非常に時間がかかるため、一気に複数のファイルのインデックスファイルを更新したい場合に使用したり、録画後バッチ処理などで使用し、動画をAviutlに瞬時に読み込めるようにします。
 
 ## 配布場所 & 更新履歴  
-[rigayaの日記兼メモ帳＞＞](http://rigaya34589.blog135.fc2.com/)  
+[rigayaの日記兼メモ帳＞＞](http://rigaya34589.blog135.fc2.com/blog-category-22.html)  
 
 ## 基本動作環境  
 Windows 7, 8, 8.1, 10 (x86/x64)  
