@@ -275,6 +275,10 @@ int main(int argc, char **argv) {
             hook_createfile.hook(aui_path, "fopen",       fopenHook,       (void **)&origFopenFunc);
         }
         for (auto target : target_list) {
+            if (!PathFileExists(target)) {
+                fprintf(stdout, "Error: \"%s\" does not exist.\n", target);
+                continue;
+            }
             char target_fullpath[MAX_PATH_LEN] = { 0 };
             if (PathIsRelative(target))
                 _fullpath(target_fullpath, target, sizeof(target_fullpath));
