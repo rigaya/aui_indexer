@@ -93,9 +93,11 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="api_hook.cpp" />
     <ClCompile Include="aui_indexer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="api_hook.h" />
     <ClInclude Include="input.h" />
   </ItemGroup>
   <ItemGroup>
