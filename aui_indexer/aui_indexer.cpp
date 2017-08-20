@@ -253,10 +253,10 @@ int main(int argc, char **argv) {
     if (!PathIsRelative(aui_path)) {
         check_aviutl_dir(aviutl_dir, aui_path);
     }
-    
+
     GetCurrentDirectory(_countof(current_dir), current_dir);
 #if NDEBUG
-    fclose(stderr); //libavformat/libavcodecのエラー出力を表示すると遅い( & うるさい) ので殺す
+    freopen("NUL", "w", stderr); //libavformat/libavcodecのエラー出力を表示すると遅い( & うるさい) ので殺す
 #endif
 
     int ret = 0;
