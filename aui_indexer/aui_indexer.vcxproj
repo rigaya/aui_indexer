@@ -98,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="api_hook.h" />
+    <ClInclude Include="aui_indexer_version.h" />
     <ClInclude Include="input.h" />
   </ItemGroup>
   <ItemGroup>

@@ -32,6 +32,7 @@
 #include <string>
 #include "input.h"
 #include "api_hook.h"
+#include "aui_indexer_version.h"
 
 static const char * const AUI_LIST[] = {
     "lwinput.aui",
@@ -123,12 +124,17 @@ FILE* fopenHook(char const* _FileName, char const* _Mode) {
 
 void print_help() {
     fprintf(stdout, ""
-        "aui_indexer.exe [-aui <aui_path>] <filepath_1> [filepath_2] [] ...\n"
-        "  options...\n"
+        "aui_indexer %s by rigaya\n"
+        "\n"
+        "usage: aui_indexer.exe [-aui <aui_path>] <filepath_1> [filepath_2] [] ...\n"
+        "\n"
+        "options...\n"
         "    -h         print help\n"
         "    -lwtmpdir  set temp dir (only effective when aui is lwinput.aui)\n"
         "    -aui       set aui path\n"
-        "                if not set, this will try to use aui below.\n");
+        "                if not set, this will try to use aui below.\n",
+        VER_STR_FILEVERSION);
+
     for (int i = 0; i < _countof(AUI_LIST); i++) {
         fprintf(stdout, "                 %s\n", AUI_LIST[i]);
     }
