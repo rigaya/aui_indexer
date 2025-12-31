@@ -1,5 +1,5 @@
 
-# aui_indexer  
+# aui_indexer は更新を終了しました
 by rigaya  
 
 lwinput.auiやm2v.auiで必要なindexファイルなどを事前生成します。  
